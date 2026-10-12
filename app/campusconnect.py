@@ -45,7 +45,6 @@ If a request involves private information or an action that CampusConnect cannot
 If a question is outside CampusConnect's primary scope:
 	Briefly explain that it is outside the system's purpose.
 	Redirect the student to CoCIS or Makerere student-support matters.
-
 """
 
 
