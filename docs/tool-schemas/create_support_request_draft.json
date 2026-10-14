@@ -1,0 +1,79 @@
+{
+  "name": "create_support_request_draft",
+  "description": "Create a DRAFT support request for the signed-in student after the student has described their problem. A draft is not visible to staff and nothing is sent. Submitting is a separate step.",
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "category",
+      "summary"
+    ],
+    "properties": {
+      "category": {
+        "type": "string",
+        "enum": [
+          "registration",
+          "fees",
+          "timetable",
+          "accounts",
+          "other"
+        ]
+      },
+      "summary": {
+        "type": "string",
+        "minLength": 10,
+        "maxLength": 500,
+        "description": "Plain-language description of the problem. No passwords or ID numbers."
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "case_ref",
+      "category",
+      "summary",
+      "status",
+      "created_at",
+      "updated_at",
+      "duplicate_of_existing_draft"
+    ],
+    "properties": {
+      "case_ref": {
+        "type": "string",
+        "pattern": "^CC-\\d{4}-\\d{5}$",
+        "description": "Support request reference, e.g. CC-2026-00001"
+      },
+      "category": {
+        "type": "string",
+        "enum": [
+          "registration",
+          "fees",
+          "timetable",
+          "accounts",
+          "other"
+        ]
+      },
+      "summary": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "DRAFT",
+          "SUBMITTED"
+        ]
+      },
+      "created_at": {
+        "type": "string"
+      },
+      "updated_at": {
+        "type": "string"
+      },
+      "duplicate_of_existing_draft": {
+        "type": "boolean"
+      }
+    }
+  }
+}
