@@ -1,0 +1,63 @@
+{
+  "name": "get_support_request_status",
+  "description": "Retrieve the current status of a support request that the signed-in student created, using its case reference. Read-only.",
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "case_ref"
+    ],
+    "properties": {
+      "case_ref": {
+        "type": "string",
+        "pattern": "^CC-\\d{4}-\\d{5}$",
+        "description": "Support request reference, e.g. CC-2026-00001"
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "case_ref",
+      "category",
+      "summary",
+      "status",
+      "created_at",
+      "updated_at"
+    ],
+    "properties": {
+      "case_ref": {
+        "type": "string",
+        "pattern": "^CC-\\d{4}-\\d{5}$",
+        "description": "Support request reference, e.g. CC-2026-00001"
+      },
+      "category": {
+        "type": "string",
+        "enum": [
+          "registration",
+          "fees",
+          "timetable",
+          "accounts",
+          "other"
+        ]
+      },
+      "summary": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "DRAFT",
+          "SUBMITTED"
+        ]
+      },
+      "created_at": {
+        "type": "string"
+      },
+      "updated_at": {
+        "type": "string"
+      }
+    }
+  }
+}
