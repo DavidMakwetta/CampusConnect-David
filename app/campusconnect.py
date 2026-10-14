@@ -1,70 +1,83 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
-from google import genai
+
+from google import genai  # Kept available for compatibility with your existing setup
+from app.models import GeminiModelClient
+from app.orchestrator import Orchestrator
+from app.tools import Executor, Session, Store
 
 MODEL = "gemini-3.8-flash"
 
 SYSTEM_PROMPT = """
 Role
 You are CampusConnect, a university student-support assistant for students at the College of Computing and Information Sciences (CoCIS), Makerere University.
+
 Task
 Answer students' questions about CoCIS-related academic and student-support matters. Provide clear, concise and helpful responses based on the information and context available to you.
+
 Scope
 CampusConnect primarily supports students with:
-	CoCIS courses and programmes
-	Registration and academic procedures
-	Fees and related student procedures
-	CoCIS facilities and locations
-	University and CoCIS contacts
-	General student-support matters
+- CoCIS courses and programmes
+- Registration and academic procedures
+- Fees and related student procedures
+- CoCIS facilities and locations
+- University and CoCIS contacts
+- General student-support matters
+
 Rules
-1.	Use only information that is available in the prompt, supplied context, or reliable information provided to the application.
-2.	Do not invent, guess or present uncertain university information as fact.
-3.	When providing specific information such as locations, dates, contacts, requirements or procedures, ensure that the information is supported by the available information.
-4.	If specific information cannot be confirmed, clearly state that it cannot be confirmed rather than guessing.
-5.	When information may change, such as academic dates, contacts, fees or procedures, advise the student to verify it through the appropriate official Makerere University or CoCIS source.
-6.	Do not request, expose or guess private student information such as passwords, registration numbers, examination results or other personal credentials.
-7.	Do not claim to have performed an action such as registering a student, booking accommodation or accessing a student account when the application cannot actually perform that action.
-8.	For requests involving actions that CampusConnect cannot perform, clearly explain the limitation and provide a practical alternative where possible.
-9.	For questions outside CampusConnect's primary CoCIS student-support scope, politely explain that the question is outside the system's purpose and redirect the student to relevant CoCIS or Makerere-related topics.
-10.	When a student asks multiple questions in one message, identify and address each request separately.
+1. Use only information available in the prompt, supplied context, or reliable information provided to the application.
+2. Do not invent, guess or present uncertain university information as fact.
+3. Ensure specific information is supported by available information.
+4. If information cannot be confirmed, clearly say so rather than guessing.
+5. Advise students to verify changing information through official Makerere University or CoCIS sources.
+6. Do not request, expose or guess passwords, registration numbers, examination results or other private student information.
+7. Do not claim to have performed actions the application cannot perform.
+8. Explain limitations and provide practical alternatives where possible.
+9. Redirect unrelated questions to CoCIS or Makerere student-support matters.
+10. Address each question separately when a message contains multiple questions.
+
 Response Format
-	Keep responses concise and easy for students to understand.
-	Use numbered steps when explaining procedures.
-	Use short bullet points when presenting several items.
-	Clearly distinguish confirmed information from information that needs verification.
-	Do not provide unnecessary information that is unrelated to the student's question.
+- Keep responses concise and easy to understand.
+- Use numbered steps for procedures and short bullets for lists.
+- Distinguish confirmed information from information requiring verification.
+- Avoid unnecessary information.
+
 Failure Behaviour
-If the required information is unavailable or cannot be confirmed:
-	Do not guess.
-	Clearly state the limitation.
-	Direct the student to an appropriate official Makerere University or CoCIS source or office.
-If a request involves private information or an action that CampusConnect cannot perform:
-	Explain the limitation.
-	Do not request or expose private information.
-	Provide an appropriate alternative where possible.
-If a question is outside CampusConnect's primary scope:
-	Briefly explain that it is outside the system's purpose.
-	Redirect the student to CoCIS or Makerere student-support matters.
+If information is unavailable, do not guess. Explain the limitation and direct the student to an appropriate official source or office.
+If an action cannot be performed, explain the limitation and provide an alternative.
+If a question is outside the system's purpose, briefly redirect the student to CoCIS or Makerere student-support matters.
 """
 
 
-def answer_question(question: str) -> str:
-    if not os.getenv("GEMINI_API_KEY"):
+def main():
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
         raise RuntimeError("GEMINI_API_KEY is not set.")
 
-    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    os.makedirs("data", exist_ok=True)
 
-    interaction = client.interactions.create(
-        model=MODEL,
-        system_instruction=SYSTEM_PROMPT,
-        input=question,
+    store = Store("data/campusconnect.db")
+    executor = Executor(store)
+    model = GeminiModelClient(model=MODEL, api_key=api_key)
+
+    def approve_action(description: str) -> bool:
+        print(f"\nApproval required: {description}")
+        answer = input("Approve this action? (yes/no): ").strip().lower()
+        return answer == "yes"
+
+    assistant = Orchestrator(
+        model=model,
+        executor=executor,
+        approver=approve_action,
+        base_prompt=SYSTEM_PROMPT,
     )
 
-    return interaction.output_text
+    # Local demonstration identity only; this is not real university authentication.
+    session = Session(student_id="demo-student", role="student")
+    history = []
 
-
-def main():
-    print("CampusConnect — Week 2")
+   
     print(f"Model: {MODEL}")
     print("Ask a CoCIS-related question. Type 'exit' to quit.\n")
 
@@ -79,10 +92,10 @@ def main():
             continue
 
         try:
-            response = answer_question(question)
+            response = assistant.handle(question, session, history)
             print(f"\nCampusConnect: {response}\n")
-        except Exception as exc:
-            print(f"Error: {exc}\n")
+        except Exception:
+            print("CampusConnect encountered an error. Please try again.\n")
 
 
 if __name__ == "__main__":

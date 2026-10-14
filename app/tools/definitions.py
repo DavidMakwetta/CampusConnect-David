@@ -1,4 +1,4 @@
-"""Tool registry. Each tool lives in its own module; add a new tool by importing its SPEC here."""
+"""Registry of available CampusConnect tools."""
 
 from app.tools import (
     create_support_request_draft,
@@ -6,7 +6,8 @@ from app.tools import (
     lookup_lecture_venue,
     submit_support_request,
 )
-from app.tools.common import CATEGORIES, STATUSES, ToolSpec  # noqa: F401  (re-exported)
+
+from app.tools.common import ToolSpec
 
 TOOLS: dict[str, ToolSpec] = {
     spec.name: spec
