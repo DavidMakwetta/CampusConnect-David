@@ -94,9 +94,8 @@ def main():
         try:
             response = assistant.handle(question, session, history)
             print(f"\nCampusConnect: {response}\n")
-        except Exception:
-            print("CampusConnect encountered an error. Please try again.\n")
-
+        except Exception as e:
+            print(f"CampusConnect error: {type(e).__name__}: {e}\n")
 
 if __name__ == "__main__":
     main()
