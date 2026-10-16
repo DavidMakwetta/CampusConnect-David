@@ -9,4 +9,3 @@ langchain-huggingface
 sentence-transformers
 faiss-cpu
 pypdf
-langchain-huggingface
