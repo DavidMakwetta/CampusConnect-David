@@ -1,4 +1,3 @@
-
 """LangGraph workflow for the bounded CampusConnect agent."""
 
 from typing import Callable, TypedDict, Any
@@ -30,6 +29,7 @@ class AgentState(TypedDict):
     iterations: int
     turn: Any
     answer: str
+    stop_reason: str
     trace: list[dict]
 
 
@@ -84,6 +84,7 @@ class CampusConnectAgent:
         except Exception as exc:
             evidence = "Document retrieval is currently unavailable."
             sources = []
+
             state["trace"].append({
                 "event": "retrieval_error",
                 "message": str(exc),
@@ -129,16 +130,18 @@ class CampusConnectAgent:
             "raw": turn.raw,
         })
 
+        iteration = state["iterations"] + 1
+
         state["trace"].append({
             "event": "model_decision",
-            "iteration": state["iterations"] + 1,
+            "iteration": iteration,
             "requested_tools": [c.name for c in turn.tool_calls],
         })
 
         return {
             "turn": turn,
             "history": history,
-            "iterations": state["iterations"] + 1,
+            "iterations": iteration,
         }
 
     def route_decision(self, state: AgentState) -> str:
@@ -157,21 +160,37 @@ class CampusConnectAgent:
             })
 
             result = self.executor.execute(
-                call.name, call.args, state["session"]
+                call.name,
+                call.args,
+                state["session"],
             )
 
+            # Actions requiring approval must not proceed without it.
             if result.error_code == Code.APPROVAL_REQUIRED:
                 approval = self.executor.gate.request(
-                    state["session"], call.name, call.args
+                    state["session"],
+                    call.name,
+                    call.args,
                 )
 
                 question = describe_action(
-                    call.name, call.args, self.executor.store
+                    call.name,
+                    call.args,
+                    self.executor.store,
                 )
-                granted = self.approver(question)
+
+                try:
+                    granted = self.approver(question)
+                except Exception as exc:
+                    granted = False
+                    state["trace"].append({
+                        "event": "approval_error",
+                        "message": str(exc),
+                    })
 
                 self.executor.gate.decide(
-                    approval.approval_id, granted
+                    approval.approval_id,
+                    granted,
                 )
 
                 state["trace"].append({
@@ -182,19 +201,24 @@ class CampusConnectAgent:
 
                 if granted:
                     result = self.executor.execute(
-                        call.name, call.args, state["session"]
+                        call.name,
+                        call.args,
+                        state["session"],
                     )
                 else:
                     result = self.executor._fail(
                         call.name,
                         Code.APPROVAL_DENIED,
-                        "The student declined. Nothing was sent. Do not retry.",
+                        "Approval was denied. Nothing was submitted.",
                     )
+
+                    state["stop_reason"] = "approval_denied"
 
             model_result = result.for_model()
 
             state["trace"].append({
                 "event": "tool_result",
+                "tool": call.name,
                 "result": model_result,
             })
 
@@ -203,20 +227,67 @@ class CampusConnectAgent:
                 "response": model_result,
             })
 
-        history = list(state["history"])
-        history.append({"role": "tool", "results": results})
+            # Do not retry a submission automatically after an error.
+            # Its final outcome may need to be checked before trying again.
+            if (
+                call.name == "submit_support_request"
+                and result.error_code is not None
+                and result.error_code != Code.APPROVAL_DENIED
+            ):
+                state["stop_reason"] = "submission_failed"
 
-        return {"history": history}
+            # Stop processing further calls after a safety boundary is hit.
+            if state["stop_reason"]:
+                break
+
+        history = list(state["history"])
+        history.append({
+            "role": "tool",
+            "results": results,
+        })
+
+        return {
+    "history": history,
+    "stop_reason": state["stop_reason"],
+}
 
     def route_after_action(self, state: AgentState) -> str:
+        if state["stop_reason"]:
+            return "stop"
+
         if state["iterations"] >= MAX_STEPS:
             return "stop"
+
         return "decide"
 
     def stop(self, state: AgentState) -> dict:
         turn = state.get("turn")
+        reason = state.get("stop_reason", "")
 
-        if turn is not None and not turn.tool_calls:
+        if reason == "approval_denied":
+            answer = (
+                "The submission was not approved, so the support request "
+                "was not submitted."
+            )
+
+        elif reason == "submission_failed":
+            answer = (
+                "The submission did not return a successful result. "
+                "Please check the request status before attempting "
+                "another submission."
+            )
+
+        elif state["iterations"] >= MAX_STEPS and (
+            turn is not None and turn.tool_calls
+        ):
+            answer = (
+                "I reached the maximum number of decision steps before "
+                "completing the task. Please check the current request "
+                "status before continuing."
+            )
+            reason = "iteration_limit"
+
+        elif turn is not None and not turn.tool_calls:
             answer = turn.text
 
             if state["sources"]:
@@ -224,11 +295,18 @@ class CampusConnectAgent:
                     f"- {source}" for source in state["sources"]
                 )
                 answer += f"\n\nSources:\n{source_list}"
+
         else:
             answer = (
                 "I couldn't finish that safely. "
                 "Please contact CoCIS student support directly."
             )
+            reason = reason or "unable_to_continue"
+
+        state["trace"].append({
+            "event": "stop",
+            "reason": reason or "final_answer",
+        })
 
         state["trace"].append({
             "event": "assistant",
@@ -236,7 +314,10 @@ class CampusConnectAgent:
             "sources": state["sources"],
         })
 
-        return {"answer": answer}
+        return {
+            "answer": answer,
+            "stop_reason": reason,
+        }
 
     def handle(
         self,
@@ -246,21 +327,24 @@ class CampusConnectAgent:
     ) -> str:
         self.trace = []
 
+        initial_history = list(history or [])
+
         result = self.graph.invoke({
             "user_text": user_text,
             "session": session,
-            "history": list(history or []),
+            "history": initial_history,
             "evidence": "",
             "sources": [],
             "iterations": 0,
             "turn": None,
             "answer": "",
+            "stop_reason": "",
             "trace": self.trace,
         })
 
         self.trace = result["trace"]
 
         if history is not None:
-            history.extend(result["history"][len(history):])
+            history.extend(result["history"][len(initial_history):])
 
         return result["answer"]
