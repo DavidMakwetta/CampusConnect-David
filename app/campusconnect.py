@@ -1,10 +1,11 @@
 from dotenv import load_dotenv
 load_dotenv()
 import os
+import json
 
 from google import genai  # Kept available for compatibility with your existing setup
 from app.models import GeminiModelClient
-from app.orchestrator import Orchestrator
+from app.agent_graph import CampusConnectAgent
 from app.tools import Executor, Session, Store
 
 MODEL = "gemini-3.8-flash"
@@ -66,7 +67,7 @@ def main():
         answer = input("Approve this action? (yes/no): ").strip().lower()
         return answer == "yes"
 
-    assistant = Orchestrator(
+    assistant = CampusConnectAgent(
         model=model,
         executor=executor,
         approver=approve_action,
