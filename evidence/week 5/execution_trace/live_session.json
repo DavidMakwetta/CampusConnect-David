@@ -1,0 +1,93 @@
+{
+  "scenario": "live_gemini_execution",
+  "test_type": "live_model_execution",
+  "model": "gemini-3.8-flash",
+  "user_request": "Please submit my existing support request CC-2026-00002. Check the request and follow the normal submission process.",
+  "final_answer": "The submission was not approved, so the support request was not submitted.",
+  "trace": [
+    {
+      "event": "user",
+      "text": "Please submit my existing support request CC-2026-00002. Check the request and follow the normal submission process."
+    },
+    {
+      "event": "retrieved_evidence",
+      "sources": [
+        "CoCIS-Annual-Report-2020-2022.pdf",
+        "CoCIS-Prospectus-2023-2024.pdf",
+        "Department of Computer Science – Makerere University College of Computing & Information Sciences (CoCIS).pdf"
+      ],
+      "evidence": "[Source: CoCIS-Annual-Report-2020-2022.pdf, page 67]\nCONTACTS:\nThe Principal, Makerere University \nCollege of Computing and Information Sciences\nTel:  +256 414 540 628 / 534 560\nEmail:   principal.cis@mak.ac.ug/pr.cis@mak.ac.ug\nWebsite:  www.cis.mak.ac.ug\nTwitter:  @MakCoCIS\nPARTNERS\n\n[Source: CoCIS-Prospectus-2023-2024.pdf, page 64]\nC o CIS  PROSPECTUS 2023\nCOLLEGE OF COMPUTING AND INFORMATION SCIENCES\n64\n57 \n \n               \n \n \n        Contacts \nCollege of Computing and Information Sciences \nP.O Box 7062 Kampala. \nTEL: 0414-540628/0414534560/1-9 \nFax: 0414-540620 \nEmail: info@cis.mak.ac.ug \n          principal.cis@mak.ac.ug/pr.cocis@mak.ac.ug \nWeb:www.cis.mak.ac.ug\n\n[Source: CoCIS-Annual-Report-2020-2022.pdf, page 59]\n11.3  Collaboration with MasterCard \nfoundation\n1. We successfully trained 212 MasterCard \nfoundation scholars in IC3 digital literacy \nprogramme.\n2. But we are yet to administer the Cyber security \nexams to those 212 stellar performers in IC3 \nand to get paid the outstanding balance by \nMasterCard foundation amounting to USD \n43,600 for training cohort 5’ 165 scholars and \ncohort 6’ 53 scholars.\n3. We switched to online teaching and learners \nhave started embracing it.\n4. With time the new normal will take root. \nStudents have started making payments to \nstudy.\n5. 6.The center received 5 new desktop computers \nfor use in the CCA lab \n6. We added a new course category in the Testing \ncanter called ISACA and clients have started \ntaking tests \n11.4 Challenges & Way Forward\n1. Online teaching and learning has not yet been \nembraced by majority of parents and learners.\n2. Due to the system migration going on within \nthe entire University it is difficult to sort data\n\n[Source: Department of Computer Science – Makerere University College of Computing & Information Sciences (CoCIS).pdf, page 1]\nWelcome to CS\n \nDepartment of Computer Science\nProf. Engineer Bainomugisha – Head of Deparment\nThe Department of Computer Science is the pioneer department of the then Faculty of Computing and Information Technology that later evolved into the School\nof Computing and Informatics Technology.\nThe Department of Computer Science is currently responsible for running programs in the area of Computer Science.\nThe Department currently runs the following programs approved by University Council:\n1. PhD in Computer Science\n2. MSc. in Computer Science\n3. Postgraduate Diploma in Computer Science\n4. BSc. in Computer Science\nMembers of the department participate in and support research through the following research groups:\n1. Artificial Intelligence & Data Science Lab\n2. Software Systems Centre\n \nAcademic Programmes\n \nAcademic Staff\n \nOur Contacts\nWe would love to hear from you.  For any inquiries, please reach us on our contacts, or address listed below;\n+256 392 000 180\n+256-752779964"
+    },
+    {
+      "event": "model_decision",
+      "iteration": 1,
+      "requested_tools": [
+        "get_support_request_status"
+      ]
+    },
+    {
+      "event": "tool_call",
+      "tool": "get_support_request_status",
+      "args": {
+        "case_ref": "CC-2026-00002"
+      }
+    },
+    {
+      "event": "tool_result",
+      "tool": "get_support_request_status",
+      "result": {
+        "ok": true,
+        "data": {
+          "case_ref": "CC-2026-00002",
+          "category": "registration",
+          "summary": "Unable to complete course registration because required courses are missing from the system.",
+          "status": "DRAFT",
+          "created_at": "2026-10-18T12:05:00Z",
+          "updated_at": "2026-10-18T12:05:00Z"
+        }
+      }
+    },
+    {
+      "event": "model_decision",
+      "iteration": 2,
+      "requested_tools": [
+        "submit_support_request"
+      ]
+    },
+    {
+      "event": "tool_call",
+      "tool": "submit_support_request",
+      "args": {
+        "case_ref": "CC-2026-00002"
+      }
+    },
+    {
+      "event": "approval",
+      "question": "Send support request CC-2026-00002 (\"Unable to complete course registration because required courses are missing from the system.\") to CoCIS support staff?",
+      "granted": false
+    },
+    {
+      "event": "tool_result",
+      "tool": "submit_support_request",
+      "result": {
+        "ok": false,
+        "error_code": "APPROVAL_DENIED",
+        "message": "Approval was denied. Nothing was submitted.",
+        "retryable": false
+      }
+    },
+    {
+      "event": "stop",
+      "reason": "approval_denied"
+    },
+    {
+      "event": "assistant",
+      "text": "The submission was not approved, so the support request was not submitted.",
+      "sources": [
+        "CoCIS-Annual-Report-2020-2022.pdf",
+        "CoCIS-Prospectus-2023-2024.pdf",
+        "Department of Computer Science – Makerere University College of Computing & Information Sciences (CoCIS).pdf"
+      ]
+    }
+  ]
+}
