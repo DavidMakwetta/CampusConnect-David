@@ -1,0 +1,59 @@
+{
+  "scenario": "approval_denied",
+  "test_type": "scripted_model",
+  "user_request": "Submit my support request CC-2026-00001.",
+  "final_answer": "The submission was not approved, so the support request was not submitted.",
+  "trace": [
+    {
+      "event": "user",
+      "text": "Submit my support request CC-2026-00001."
+    },
+    {
+      "event": "retrieved_evidence",
+      "sources": [
+        "test.pdf"
+      ],
+      "evidence": "Test evidence."
+    },
+    {
+      "event": "model_decision",
+      "iteration": 1,
+      "requested_tools": [
+        "submit_support_request"
+      ]
+    },
+    {
+      "event": "tool_call",
+      "tool": "submit_support_request",
+      "args": {
+        "case_ref": "CC-2026-00001"
+      }
+    },
+    {
+      "event": "approval",
+      "question": "Send support request CC-2026-00001 to CoCIS support staff?",
+      "granted": false
+    },
+    {
+      "event": "tool_result",
+      "tool": "submit_support_request",
+      "result": {
+        "ok": false,
+        "error_code": "APPROVAL_DENIED",
+        "message": "Approval was denied. Nothing was submitted.",
+        "retryable": false
+      }
+    },
+    {
+      "event": "stop",
+      "reason": "approval_denied"
+    },
+    {
+      "event": "assistant",
+      "text": "The submission was not approved, so the support request was not submitted.",
+      "sources": [
+        "test.pdf"
+      ]
+    }
+  ]
+}

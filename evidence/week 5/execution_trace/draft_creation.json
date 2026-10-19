@@ -1,0 +1,69 @@
+{
+  "scenario": "live_gemini_execution",
+  "test_type": "live_model_execution",
+  "model": "gemini-3.8-flash",
+  "user_request": "I cannot complete my course registration because some courses are missing. Help me prepare a support request, but do not submit it.",
+  "final_answer": "I have created a draft support request for you. It has **not** been submitted to CoCIS staff.\n\n### Draft Support Request Details\n* **Reference Number:** `CC-2026-00003`\n* **Category:** Registration\n* **Status:** DRAFT\n* **Summary:** Unable to complete course registration because some courses are missing on the registration portal.\n\n---\n\n### Important Notes\n* **Examination Eligibility:** Please ensure this issue is resolved and your registration is completed promptly, as university regulations specify that only registered students are permitted to sit university examinations (*Examinations _ Makerere University.pdf*).\n* Specific administrative steps for resolving missing courses on the portal could not be confirmed from the available documents; please contact your department or the College/School Office if you need immediate in-person assistance (*Examinations _ Makerere University.pdf*).\n* Whenever you are ready to send this request to CoCIS support staff, let me know and I will ask for your confirmation to submit it.\n\nSources:\n- Examinations _ Makerere University.pdf\n- CoCIS-Prospectus-2023-2024.pdf",
+  "trace": [
+    {
+      "event": "user",
+      "text": "I cannot complete my course registration because some courses are missing. Help me prepare a support request, but do not submit it."
+    },
+    {
+      "event": "retrieved_evidence",
+      "sources": [
+        "Examinations _ Makerere University.pdf",
+        "CoCIS-Prospectus-2023-2024.pdf"
+      ],
+      "evidence": "[Source: Examinations _ Makerere University.pdf, page 1]\nBoard and also can be obtained in the university webpage using your passwords. If\nyou still do not know your results a week after they are published, you can contact\nthe College/ School Oﬃce to get them. Retaking a Course or Courses A student\nshall retake a Course or Course units when next offered again in order to obtain at\nleast the Pass Mark (50%) if he/she had failed during the ﬁrst Assessment in the\nCourse or Courses. A student who has failed to obtain at least the (50%) during the\nsecond Assessment in the same course he/she has retaken shall receive a warning.\nA student who misses to sit examinations for justiﬁed reasons and he/she is\npermitted to do the missed examination, the grades obtained from a deferred\nexamination shall not be categorized as a retake because the assessment is for the\nﬁrst time.\nRetaking a Course or Courses\nA student shall retake a Course or Course units when next offered again in order to\n\n[Source: Examinations _ Makerere University.pdf, page 1]\nCGPA.\nIf the board of a college/ school is satisﬁed that a student was absent from\ncoursework assessment and or a ﬁnal examination due to justiﬁable reasons such as\nsickness or loss of a parent/ guardian, then a Course Grade of ABS shall be assigned\nto that Course(s).\nDeferred Examinations\nIt is essential that you let us know what happened if you miss an examination.\nA student who provides credible reason for failure to complete coursework\nassessment or to attend an examination based on above may be permitted to sit the\ndeferred examination or coursework assignment when the course is being offered\nagain.\nA student who needs to defer an examination must submit application to his/her\nrespective Principal/ Dean’s Oﬃces. The application and supporting documentation\npertaining to the absence must be presented as soon as the student is able, having\nregard to the circumstances underlying the absence but not later than the\n\n[Source: CoCIS-Prospectus-2023-2024.pdf, page 40]\npassing the required course at the end of the semester.\nCourse Exemptions \nStudents with related postgraduate qualifications from recognized \ninstitutions will be exempted from certain curses. Creating such exemptions \nwill depend on the candidate’s training background. Exemptions will only \napply for courses where the candidate obtained at least 60% mark or \nequivalent. Such students will have their credits transferred to make up \nfor the insufficiency arising out of course exemption. Students who will be \nexempted but do not have total programme load for this MSc programme \nwill be required to take elective courses to make up for the insufficiency. \nStudents seeking exemptions will have to apply to the Dean EASLIS and will \nbe subjected to an interview to determine their suitability for exemption. \nThe application will include justification of the request and evidence of \nrelevant credentials in support of the request.\n\n[Source: Examinations _ Makerere University.pdf, page 1]\nleast the Pass Mark (50%) in the Course(s).\nWho is permitted to sit semester\nexaminations?\nOnly registered students are permitted to sit University examinations. A student who\ndoesn’t pay all required University fees will not be permitted to sit the University\nexaminations. The examination results of any student who has sat the examinations\nwithout being registered shall be nulliﬁed. Students are nulliﬁed. Students are\nstrongly warned against this.\nCertiﬁcate of Due Performance\nAny student whose attendance at prescribed lectures, classes, practical classes,\nseminars, tutorials or clinical instructions has been unsatisfactory or has failed to\nsubmit essays or exercises of to take tests class examinations set by his/her\nlecturers, may be denied the certiﬁcate of Due Performance and may be barred by\nSenate from sitting any University Examinations.\nA student who fails to honor the dead-line set for handing in an assignment without"
+    },
+    {
+      "event": "model_decision",
+      "iteration": 1,
+      "requested_tools": [
+        "create_support_request_draft"
+      ]
+    },
+    {
+      "event": "tool_call",
+      "tool": "create_support_request_draft",
+      "args": {
+        "summary": "Unable to complete course registration because some courses are missing on the registration portal.",
+        "category": "registration"
+      }
+    },
+    {
+      "event": "tool_result",
+      "tool": "create_support_request_draft",
+      "result": {
+        "ok": true,
+        "data": {
+          "case_ref": "CC-2026-00003",
+          "category": "registration",
+          "summary": "Unable to complete course registration because some courses are missing on the registration portal.",
+          "status": "DRAFT",
+          "created_at": "2026-10-18T12:56:38Z",
+          "updated_at": "2026-10-18T12:56:38Z",
+          "duplicate_of_existing_draft": false
+        }
+      }
+    },
+    {
+      "event": "model_decision",
+      "iteration": 2,
+      "requested_tools": []
+    },
+    {
+      "event": "stop",
+      "reason": "final_answer"
+    },
+    {
+      "event": "assistant",
+      "text": "I have created a draft support request for you. It has **not** been submitted to CoCIS staff.\n\n### Draft Support Request Details\n* **Reference Number:** `CC-2026-00003`\n* **Category:** Registration\n* **Status:** DRAFT\n* **Summary:** Unable to complete course registration because some courses are missing on the registration portal.\n\n---\n\n### Important Notes\n* **Examination Eligibility:** Please ensure this issue is resolved and your registration is completed promptly, as university regulations specify that only registered students are permitted to sit university examinations (*Examinations _ Makerere University.pdf*).\n* Specific administrative steps for resolving missing courses on the portal could not be confirmed from the available documents; please contact your department or the College/School Office if you need immediate in-person assistance (*Examinations _ Makerere University.pdf*).\n* Whenever you are ready to send this request to CoCIS support staff, let me know and I will ask for your confirmation to submit it.\n\nSources:\n- Examinations _ Makerere University.pdf\n- CoCIS-Prospectus-2023-2024.pdf",
+      "sources": [
+        "Examinations _ Makerere University.pdf",
+        "CoCIS-Prospectus-2023-2024.pdf"
+      ]
+    }
+  ]
+}
